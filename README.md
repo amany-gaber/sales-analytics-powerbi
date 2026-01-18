@@ -1,164 +1,114 @@
-Sales ETL Pipeline & Dimensional Modeling
-Project Overview
+# Sales ETL Pipeline & Analytics Data Model
 
-This project demonstrates an end-to-end ETL pipeline for sales data, starting from raw JSON extraction to building a clean, analytics-ready dimensional data model.
-The final output supports reporting, trend analysis, and actual vs forecast comparison.
+An end-to-end Sales ETL pipeline that transforms raw JSON data into an analytics-ready dimensional data model, enabling reporting, trend analysis, and actual vs forecast comparison.
 
-Project Objectives
+## Why This Project?
 
-Extract and validate raw sales data
+This project focuses on data quality, modeling decisions, and analytics readiness, not just data cleaning.
 
-Perform data profiling and quality checks
+It demonstrates how raw transactional data can be transformed into a scalable analytical structure suitable for BI and reporting use cases.
 
-Apply transformations to improve consistency and usability
+## Dataset Overview
 
-Build a dimensional model for analytical queries
+Sales Data: Flattened JSON transactional dataset
 
-Integrate forecast data for comparison with actual sales
+Forecast Data: Clean forecast table for 2008–2009
 
-Data Sources
+Data granularity: Order-level transactions
 
-Sales Data: Flattened JSON file containing transactional sales records
+## ⚙️ ETL Pipeline Overview
+Extract  →  Validate  →  Transform  →  Model  →  Analyze
 
-Forecast Data: Clean table covering years 2008–2009, aggregated by:
+🔹 Extract
 
-CountryRegion
+Loaded flattened JSON into Pandas DataFrame
 
-Brand
+UTF-8 encoding applied
 
-Year
+🔹 Validate & Profile
 
-ETL Pipeline
-1. Extract
+Schema validation (no unmapped fields)
 
-Loaded flattened JSON sales data into a Pandas DataFrame
+Null, duplicate, and data type checks
 
-Applied UTF-8 encoding to avoid character issues
+Identified:
 
-2. Validation & Profiling
+High null ratios in customer attributes
 
-Schema validation against predefined structure
+Date stored without proper datetime type
 
-Checked for:
+🔹 Transform
 
-Unexpected fields
+Standardized column names
 
-Null values
+Converted OrderDate to datetime
 
-Duplicate records
+Removed redundant / low-value columns:
 
-Key findings:
+Education, Occupation, Color, CustomerCode
 
-OrderDate was not in datetime format
+Duplicates retained intentionally due to missing unique order identifier
 
-High null ratios in customer-related attributes
+🏗️ Data Modeling
 
-Presence of duplicate records
+The final model follows a Fact Constellation (Galaxy Schema) to support both transactional and forecast analysis.
 
-3. Transformation
+⭐ Dimensions
+Dimension	Description
+dim_product	Product hierarchy and attributes
+dim_customer	Customer master data
+dim_geography	Location hierarchy
+dim_date	Calendar attributes
+🔢 Fact Tables
+Fact Table	Description
+fact_sales	Transactional sales data
+forecast	Planned / forecasted sales
+🔮 Forecast Integration
 
-Standardized column names for consistency
+Forecast data validated and integrated
 
-Converted OrderDate to datetime format
+Enables:
 
-Reviewed duplicate handling:
-
-Duplicates were retained due to lack of a unique order identifier or timestamp
-
-Removed low-value and redundant columns:
-
-Education
-
-Occupation
-
-Color
-
-CustomerCode
-
-Retained CustomerKey as the primary customer identifier for performance and join efficiency
-
-Data Modeling
-
-The cleaned dataset was modeled using a Fact Constellation (Galaxy Schema) to support both transactional and forecast analysis.
-
-Dimension Tables
-
-dim_product
-(ProductKey, ProductName, Brand, Subcategory, Category)
-
-dim_customer
-(CustomerKey, Name)
-
-dim_geography
-(GeographyKey, City, State, CountryRegion, Continent)
-
-dim_date
-(DateKey, OrderDate, Year, Month, MonthName, Quarter)
-
-Fact Tables
-
-fact_sales
-
-Measures: Quantity, NetPrice, SalesAmount
-
-forecast
-
-Measures: Forecasted sales by region, brand, and year
-
-Forecast Integration
-
-Forecast data was validated and confirmed clean
-
-Integrated to enable:
-
-Actual vs forecast comparison
+Actual vs Forecast analysis
 
 Trend analysis
 
 Regional and brand-level insights
 
-Output Files
+📂 Project Output
+├── dim_product.csv
+├── dim_customer.csv
+├── dim_geography.csv
+├── dim_date.csv
+├── fact_sales.csv
+├── forecast.csv
 
-The pipeline generates the following CSV files:
+🧩 Key Design Decisions
 
-dim_product.csv
+Guest customers are identified via geography-based codes (regional behavior)
 
-dim_customer.csv
+Integer surrogate keys used for performance and scalability
 
-dim_geography.csv
+Galaxy schema chosen to support multiple fact tables
 
-dim_date.csv
+Data accuracy prioritized over aggressive deduplication
 
-fact_sales.csv
-
-forecast.csv
-
-Key Design Decisions
-
-Guest-mode customers are identified by geography-based codes, representing regions rather than individuals
-
-Duplicate records were retained to avoid loss of valid same-day transactions
-
-Integer surrogate keys were preferred for performance and scalability
-
-Galaxy schema was chosen to support multiple fact tables sharing dimensions
-
-Tools & Technologies
+🛠️ Tech Stack
 
 Python
 
 Pandas
 
-CSV-based data warehouse structure
+Dimensional Modeling (Star / Galaxy Schema)
 
-Dimensional modeling (Star / Galaxy Schema)
+CSV-based analytics layer
 
-Potential Enhancements
+🚀 Future Improvements
 
-Introduce a unique order identifier or timestamp
+Add unique order identifier or timestamp
 
-Load data into a relational or cloud data warehouse
+Load data into a cloud data warehouse
 
-Add incremental ETL logic
+Build BI dashboards (Power BI / Tableau)
 
-Build dashboards for actual vs forecast analysis
+Automate incremental ETL
