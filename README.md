@@ -1,114 +1,105 @@
-# Sales ETL Pipeline & Analytics Data Model
+# Sales ETL Pipeline
 
-An end-to-end Sales ETL pipeline that transforms raw JSON data into an analytics-ready dimensional data model, enabling reporting, trend analysis, and actual vs forecast comparison.
+An end-to-end ETL pipeline that transforms raw sales JSON data into an analytics-ready dimensional data model, enabling reporting and **actual vs forecast** analysis.
 
-## Why This Project?
+---
 
-This project focuses on data quality, modeling decisions, and analytics readiness, not just data cleaning.
+## Overview
 
-It demonstrates how raw transactional data can be transformed into a scalable analytical structure suitable for BI and reporting use cases.
+This project focuses on data quality, transformation logic, and dimensional modeling, turning raw transactional data into a structure suitable for BI and analytical workloads.
 
-## Dataset Overview
+---
 
-Sales Data: Flattened JSON transactional dataset
+## Data Sources
 
-Forecast Data: Clean forecast table for 2008–2009
+- **Sales Data**: Flattened JSON transactional dataset  
+- **Forecast Data**: Clean forecast dataset (2008–2009) by country, brand, and year  
 
-Data granularity: Order-level transactions
+---
 
-## ⚙️ ETL Pipeline Overview
-Extract  →  Validate  →  Transform  →  Model  →  Analyze
+## ETL Flow
 
-🔹 Extract
 
-Loaded flattened JSON into Pandas DataFrame
 
-UTF-8 encoding applied
+### Extract
+- Loaded flattened JSON into Pandas
+- Applied UTF-8 encoding
 
-🔹 Validate & Profile
+### Validate
+- Schema validation (no unexpected fields)
+- Null, duplicate, and data type checks
+- Identified high null ratios in customer attributes
+- Detected non-datetime `OrderDate`
 
-Schema validation (no unmapped fields)
+### Transform
+- Standardized column names
+- Converted `OrderDate` to datetime
+- Removed low-value and redundant columns:
+  - `Education`
+  - `Occupation`
+  - `Color`
+  - `CustomerCode`
+- Duplicates were retained due to the absence of a unique order identifier
 
-Null, duplicate, and data type checks
+---
 
-Identified:
+## Data Model
 
-High null ratios in customer attributes
+The final design follows a **Fact Constellation (Galaxy Schema)**, allowing multiple fact tables to share common dimensions.
 
-Date stored without proper datetime type
+### Dimensions
 
-🔹 Transform
+| Dimension | Description |
+|---------|------------|
+| dim_product | Product attributes and hierarchy |
+| dim_customer | Customer master data |
+| dim_geography | Geographic hierarchy |
+| dim_date | Calendar attributes |
 
-Standardized column names
+### Fact Tables
 
-Converted OrderDate to datetime
+| Fact Table | Description |
+|-----------|------------|
+| fact_sales | Transactional sales data |
+| forecast | Forecasted sales values |
 
-Removed redundant / low-value columns:
+---
 
-Education, Occupation, Color, CustomerCode
+## Forecast Integration
 
-Duplicates retained intentionally due to missing unique order identifier
+The forecast dataset was validated and integrated to support:
+- Actual vs Forecast comparison
+- Trend analysis
+- Regional and brand-level insights
 
-🏗️ Data Modeling
+---
 
-The final model follows a Fact Constellation (Galaxy Schema) to support both transactional and forecast analysis.
+## Output Structure
 
-⭐ Dimensions
-Dimension	Description
-dim_product	Product hierarchy and attributes
-dim_customer	Customer master data
-dim_geography	Location hierarchy
-dim_date	Calendar attributes
-🔢 Fact Tables
-Fact Table	Description
-fact_sales	Transactional sales data
-forecast	Planned / forecasted sales
-🔮 Forecast Integration
 
-Forecast data validated and integrated
+---
 
-Enables:
+## Key Design Decisions
 
-Actual vs Forecast analysis
+- Guest customers are identified using geography-based codes (regional behavior)
+- Integer surrogate keys were used for performance and efficient joins
+- Galaxy schema was selected to support multiple analytical fact tables
+- Data accuracy was prioritized over aggressive deduplication
 
-Trend analysis
+---
 
-Regional and brand-level insights
+## Tech Stack
 
-📂 Project Output
-├── dim_product.csv
-├── dim_customer.csv
-├── dim_geography.csv
-├── dim_date.csv
-├── fact_sales.csv
-├── forecast.csv
+- Python
+- Pandas
+- Dimensional Modeling
+- CSV-based analytics layer
 
-🧩 Key Design Decisions
+---
 
-Guest customers are identified via geography-based codes (regional behavior)
+## Future Enhancements
 
-Integer surrogate keys used for performance and scalability
-
-Galaxy schema chosen to support multiple fact tables
-
-Data accuracy prioritized over aggressive deduplication
-
-🛠️ Tech Stack
-
-Python
-
-Pandas
-
-Dimensional Modeling (Star / Galaxy Schema)
-
-CSV-based analytics layer
-
-🚀 Future Improvements
-
-Add unique order identifier or timestamp
-
-Load data into a cloud data warehouse
-
-Build BI dashboards (Power BI / Tableau)
-
-Automate incremental ETL
+- Introduce a unique order identifier or timestamp
+- Load data into a data warehouse
+- Build BI dashboards (Power BI / Tableau)
+- Automate incremental ETL
